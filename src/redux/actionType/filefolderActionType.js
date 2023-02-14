@@ -1,0 +1,17 @@
+export const CREATE_FOLDER = "CREATE_FOLDER";
+export const ADD_FOLDER = "ADD_FOLDER";
+export const SET_LOADING = "SET_LOADING";
+export const CHANGE_FOLDER = "CHANGE_FOLDER";
+
+export const ADD_FILES = "ADD_FILES";
+export const CREATE_FILE = "CREATE_FILES";
+export const SEARCHBAR = "SEARCHBAR";
+export const DELETE_FILE = "DELETE_FILE";
+export const SET_FILE_DATA = "SET_FILE_DATA";
+
+export const FETCH_FOLDER = "FETCH_FOLDER";
+export const FETCH_FILES = "FETCH_FILES";
+export const CHANGE_FOLDER_SAGA = "CHANGE_FOLDER_SAGA";
+export const DELETE_FILE_SAGA = "DELETE_FILE_SAGA";
+export const DELETE_FOLDER_SAGA = "DELETE_FOLDER_SAGA";
+export const CREATE_FOLDER_SAGA = "CREATE_FOLDER_SAGA";
