@@ -40,17 +40,7 @@ const filefolderReducer = (state = initialState, action) => {
         ...state,
         Files: action.payload,
       };
-    // case types.DELETE_FILE:
-    //   return {
-    //     ...state,
-    //     Files: state.Files.filter((file) => file.data.name !== action.payload),
-    //   };
-    // case types.SEARCHBAR:
-    //   return {
-    //     ...state,
-    //     text: action.payload,
-    //     loading: false,
-    //   };
+
     case types.SET_FILE_DATA:
       const { fileId, data } = action.payload;
       const allFiles = state.Files;

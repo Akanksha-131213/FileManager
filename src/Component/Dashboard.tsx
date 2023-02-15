@@ -12,8 +12,6 @@ interface State {
 }
 
 export const Dashboard = () => {
-  // const folders =["new folder","new folder 2"];
-  //const files =[ {name:"new f1"}, {name:"new f2"}];
   const { isLoading, Folders, Files } = useSelector(
     (state: State) => ({
       isLoading: state.filefolder.isLoading,

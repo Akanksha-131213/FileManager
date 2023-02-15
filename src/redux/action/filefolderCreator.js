@@ -60,18 +60,8 @@ export const getFiles = () => {
   return { type: types.FETCH_FILES };
 };
 
-export const createFile = (data) => (dispatch) => {
-  console.log(data);
-  fire
-    .firestore()
-    .collection("files")
-    .add(data)
-    .then(async (file) => {
-      const fileData = await (await file.get()).data();
-      const fileId = file.id;
-      toast.success("created sucessfully");
-      dispatch(addFile({ data: fileData, docId: fileId }));
-    });
+export const createFile = (data) => {
+  return { type: types.CREATE_FILE_SAGA, payload: data };
 };
 export const delFile = (id) => {
   return { type: types.DELETE_FILE_SAGA, payload: id };
@@ -79,55 +69,10 @@ export const delFile = (id) => {
 export const delFolder = (id) => {
   return { type: types.DELETE_FOLDER_SAGA, payload: id };
 };
-export const updateFileData = (fileId, data) => (dispatch) => {
-  fire
-    .firestore()
-    .collection("files")
-    .doc(fileId)
-    .update({ data })
-    .then(() => {
-      dispatch(setFileData({ fileId, data }));
-      toast.success("File saved successfully!");
-    })
-    .catch(() => {
-      toast.error("Something went wrong!");
-    });
+export const updateFileData = (fileId, data) => {
+  return { type: types.UPDATE_FILE_DATA, payload: { fileId, data } };
 };
 
-export const uploadFile = (file, data, setSuccess) => (dispatch) => {
-  toast.info("uploading...");
-  const uploadFileRef = fire.storage().ref(`files/${data.name}`);
-
-  uploadFileRef.put(file).on(
-    "state_changed",
-    (snapshot) => {
-      const prog = Math.round(
-        (snapshot.bytesTransferred / snapshot.totalBytes) * 100
-      );
-
-      console.log("uploading " + prog + "%");
-    },
-    (error) => {
-      toast.error(error);
-    },
-    async () => {
-      const fileUrl = await uploadFileRef.getDownloadURL();
-      const fullData = { ...data, url: fileUrl };
-
-      fire
-        .firestore()
-        .collection("files")
-        .add(fullData)
-        .then(async (file) => {
-          const fileData = await (await file.get()).data();
-          const fileId = file.id;
-          dispatch(addFile({ data: fileData, docId: fileId }));
-          toast.success("File uploaded successfully!");
-          setSuccess(true);
-        })
-        .catch(() => {
-          setSuccess(false);
-        });
-    }
-  );
+export const uploadFile = (file, data, setSuccess) => {
+  return { type: types.UPLOAD_FILE, payload: { file, data, setSuccess } };
 };

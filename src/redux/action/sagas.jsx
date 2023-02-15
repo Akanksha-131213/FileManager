@@ -1,8 +1,9 @@
 import {  put ,call, takeEvery} from "redux-saga/effects";
-import {setLoading,addFolders,addFiles, setChangeFolder, deleteFile, deleteFolder, addFolder} from "./filefolderCreator";
+import {setLoading,addFolders,addFiles, setChangeFolder, deleteFile, deleteFolder, addFolder, addFile, setFileData} from "./filefolderCreator";
 import fire from "../../config/firebase";
 import * as types from "../actionType/filefolderActionType";
 import { toast } from "react-toastify";
+
 const getfolderapi=()=>{
     return( fire
     .firestore()
@@ -34,6 +35,21 @@ const getfileapi=()=>{
         })
     )
 }
+
+const getcreateFileapi=(data)=>{
+    return (fire
+    .firestore()
+    .collection("files")
+    .add(data)
+    .then(async (file) => {
+      const fileData = await (await file.get()).data();
+      const fileId = file.id;
+      return {fileData,fileId}
+    //   toast.success("created sucessfully");
+    //   dispatch(addFile({ data: fileData, docId: fileId }));
+    }));
+}
+
 const getCreateFolderapi=(data)=>{
     return (fire
     .firestore()
@@ -43,8 +59,7 @@ const getCreateFolderapi=(data)=>{
       const folderData = await (await folder.get()).data();
       const folderId = folder.id;
       return ({folderData,folderId})
-    //   dispatch(addFolder({ data: folderData, docId: folderId }));
-    //   toast.success("folder created successfully");
+ 
     }));
     
 
@@ -72,6 +87,68 @@ const getDelFolderapi=(id)=>{
     .then(toast.success("Folder deleted")));
     
 }
+const updateFileDataapi=(fileId,data)=>{
+   return( fire
+    .firestore()
+    .collection("files")
+    .doc(fileId)
+    .update({ data })
+    .then(() => {
+      //dispatch(setFileData({ fileId, data }));
+      toast.success("File saved successfully!");
+    })
+    .catch(() => {
+      toast.error("Something went wrong!");
+    }));
+}
+
+const uploadFileapi=(file, data, setSuccess)=>{
+    toast.info("uploading...")
+    const uploadFileRef = fire.storage().ref(`files/${data.name}`);
+  let datainfo;
+    return uploadFileRef.put(file).on(
+      "state_changed",
+      (snapshot) => {
+        const prog = Math.round(
+          (snapshot.bytesTransferred / snapshot.totalBytes) * 100
+        );
+  
+        console.log("uploading " + prog + "%");
+      },
+      (error) => {
+        toast.error(error);
+      },
+      async () => { 
+        const fileUrl = await uploadFileRef.getDownloadURL();
+        const fullData = { ...data, url: fileUrl };
+        
+           return( fire
+              .firestore()
+              .collection("files")
+              .add(fullData)
+              .then(async function*  (file)  {
+                console.log(file)
+                const fileData = await (await file.get()).data();
+                console.log(fileData)
+                const fileId = file.id;
+                datainfo=fileData;
+                yield put (addFile({ data:fileData, docId: fileId }))
+
+                
+
+            
+              }).catch((e)=>{
+                console.log(e);
+              })) 
+        
+          
+      }
+    );
+    console.log()
+    
+}
+
+
 function* getFiles(){
     try{
         const filesData=yield call (getfileapi)
@@ -137,6 +214,43 @@ function* createFolder({payload:data}){
 
 }
 
+function* createFile({payload:data}){
+    try{
+        const {fileData,fileId}=yield call (()=>getcreateFileapi(data));
+        yield put(addFile({ data: fileData, docId: fileId }));
+        toast.success("file created successfully");
+    
+        }catch(e){
+            console.log("createFile has problem : ",e)
+        }
+
+}
+
+function* updateFileData({payload : {fileId,data}}){
+try{
+    yield call (()=>updateFileDataapi(fileId,data))
+    yield put (setFileData({ fileId, data }))
+}catch (e){}
+}
+
+function* uploadFile({payload:{file, data, setSuccess}}){
+    try{
+        
+    const fileInfo= yield call (()=>uploadFileapi(file, data, setSuccess))
+    console.log(fileInfo)
+    // yield put (addFile({ data:fileInfo.fileData, docId: fileInfo.fileId }))
+    // yield put (deleteFile())
+   
+    }
+     
+    catch (e){
+        console.log(e)
+      
+    }
+
+}
+
+
 export function* sagas(){
     yield takeEvery(types.FETCH_FOLDER,getFolders)
     yield takeEvery(types.FETCH_FILES,getFiles)
@@ -144,5 +258,8 @@ export function* sagas(){
     yield takeEvery(types.DELETE_FILE_SAGA,delFile)
     yield takeEvery(types.DELETE_FOLDER_SAGA,delFolder)
     yield takeEvery(types.CREATE_FOLDER_SAGA,createFolder)
+    yield takeEvery(types.CREATE_FILE_SAGA,createFile)
+    yield takeEvery(types.UPDATE_FILE_DATA,updateFileData)
+    yield takeEvery(types.UPLOAD_FILE,uploadFile)
 }
 

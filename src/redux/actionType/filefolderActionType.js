@@ -9,9 +9,13 @@ export const SEARCHBAR = "SEARCHBAR";
 export const DELETE_FILE = "DELETE_FILE";
 export const SET_FILE_DATA = "SET_FILE_DATA";
 
+// for saga
 export const FETCH_FOLDER = "FETCH_FOLDER";
 export const FETCH_FILES = "FETCH_FILES";
 export const CHANGE_FOLDER_SAGA = "CHANGE_FOLDER_SAGA";
 export const DELETE_FILE_SAGA = "DELETE_FILE_SAGA";
 export const DELETE_FOLDER_SAGA = "DELETE_FOLDER_SAGA";
 export const CREATE_FOLDER_SAGA = "CREATE_FOLDER_SAGA";
+export const CREATE_FILE_SAGA = "CREATE_FILES_SAGA";
+export const UPDATE_FILE_DATA = "UPDATE_FILE_DATA";
+export const UPLOAD_FILE = "UPLOAD_FILE";
