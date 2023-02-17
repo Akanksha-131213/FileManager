@@ -4,7 +4,7 @@ import { faTimes } from "@fortawesome/free-solid-svg-icons";
 import { useSelector, shallowEqual, useDispatch } from "react-redux";
 import { uploadFile } from "../../redux/action/filefolderCreator.js";
 import { toast } from "react-toastify";
-import { Button, Form, Modal } from "react-bootstrap";
+import { Button, Modal } from "react-bootstrap";
 
 interface State {
   filefolder: any;
@@ -15,7 +15,7 @@ interface State {
   Files: [];
 }
 
-const UploadFile = ({ setIsFileUploadModalOpen }) => {
+const UploadFile = ({ showModal3, setShowModal3 }) => {
   const [file, setFile] = useState(null);
   const [success, setSuccess] = useState(false);
 
@@ -36,7 +36,7 @@ const UploadFile = ({ setIsFileUploadModalOpen }) => {
     if (success) {
       setFile("");
       setSuccess(false);
-      setIsFileUploadModalOpen(false);
+      setShowModal3(false);
     }
   }, [success]);
 
@@ -69,7 +69,7 @@ const UploadFile = ({ setIsFileUploadModalOpen }) => {
           data: null,
           url: "",
         };
-        setIsFileUploadModalOpen(false);
+        setShowModal3(false);
 
         dispatch(uploadFile(file, data, success, setSuccess));
       } else {
@@ -81,27 +81,22 @@ const UploadFile = ({ setIsFileUploadModalOpen }) => {
   };
 
   return (
-    <div
-      className="col-md-12 position-fixed top-0 left-0 w-100 h-100"
-      style={{ background: "rgba(0, 0, 0, 0.4)", zIndex: 9999 }}
-    >
-      <div className="row align-items-cnter justify-content-center">
-        <div className="col-md-4 mt-5 bg-white rounded p-4">
-          <div className="d-flex justify-content-between">
-            <h4>Upload File</h4>
-            <button
-              className="btn"
-              onClick={() => setIsFileUploadModalOpen(false)}
+    <div>
+      <div>
+        <Modal show={showModal3} onHide={() => setShowModal3(false)}>
+          <Modal.Header>
+            <Modal.Title>Create File</Modal.Title>
+            <Button
+              id="closefile"
+              variant="white"
+              style={{ cursor: "pointer" }}
+              onClick={() => setShowModal3(false)}
             >
-              <FontAwesomeIcon
-                icon={faTimes}
-                className="text-black"
-                size="sm"
-              />
-            </button>
-          </div>
-          <hr />
-          <div className="d-flex flex-column align-items-center">
+              <FontAwesomeIcon icon={faTimes} />
+            </Button>
+          </Modal.Header>
+          <Modal.Body>
+            {" "}
             <form className="mt-3 w-100" onSubmit={handleSubmit}>
               <div className="form-group">
                 <input
@@ -111,7 +106,6 @@ const UploadFile = ({ setIsFileUploadModalOpen }) => {
                   onChange={(e) => setFile(e.target.files[0])}
                 />
               </div>
-
               <button
                 type="submit"
                 className="btn btn-primary mt-5 form-control"
@@ -119,8 +113,8 @@ const UploadFile = ({ setIsFileUploadModalOpen }) => {
                 Upload File
               </button>
             </form>
-          </div>
-        </div>
+          </Modal.Body>
+        </Modal>
       </div>
     </div>
   );

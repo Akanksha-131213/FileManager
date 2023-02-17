@@ -77,7 +77,10 @@ function Home() {
         )}
 
         {isUploadFileOpt && (
-          <UploadFile setIsFileUploadModalOpen={setUploadFileOpt} />
+          <UploadFile
+            setShowModal3={setUploadFileOpt}
+            showModal3={isUploadFileOpt}
+          />
         )}
 
         {showSubBar && (
