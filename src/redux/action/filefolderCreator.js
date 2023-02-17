@@ -73,6 +73,6 @@ export const updateFileData = (fileId, data) => {
   return { type: types.UPDATE_FILE_DATA, payload: { fileId, data } };
 };
 
-export const uploadFile = (file, data, setSuccess) => {
-  return { type: types.UPLOAD_FILE, payload: { file, data, setSuccess } };
+export const uploadFile = (file, data) => {
+  return { type: types.UPLOAD_FILE, payload: { file, data } };
 };

@@ -1,9 +1,8 @@
-import {  put ,call, takeEvery} from "redux-saga/effects";
+import {  put ,call, takeEvery,delay} from "redux-saga/effects";
 import {setLoading,addFolders,addFiles, setChangeFolder, deleteFile, deleteFolder, addFolder, addFile, setFileData} from "./filefolderCreator";
 import fire from "../../config/firebase";
 import * as types from "../actionType/filefolderActionType";
 import { toast } from "react-toastify";
-
 const getfolderapi=()=>{
     return( fire
     .firestore()
@@ -102,51 +101,7 @@ const updateFileDataapi=(fileId,data)=>{
     }));
 }
 
-const uploadFileapi=(file, data, setSuccess)=>{
-    toast.info("uploading...")
-    const uploadFileRef = fire.storage().ref(`files/${data.name}`);
-  let datainfo;
-    return uploadFileRef.put(file).on(
-      "state_changed",
-      (snapshot) => {
-        const prog = Math.round(
-          (snapshot.bytesTransferred / snapshot.totalBytes) * 100
-        );
-  
-        console.log("uploading " + prog + "%");
-      },
-      (error) => {
-        toast.error(error);
-      },
-      async () => { 
-        const fileUrl = await uploadFileRef.getDownloadURL();
-        const fullData = { ...data, url: fileUrl };
-        
-           return( fire
-              .firestore()
-              .collection("files")
-              .add(fullData)
-              .then(async function*  (file)  {
-                console.log(file)
-                const fileData = await (await file.get()).data();
-                console.log(fileData)
-                const fileId = file.id;
-                datainfo=fileData;
-                yield put (addFile({ data:fileData, docId: fileId }))
 
-                
-
-            
-              }).catch((e)=>{
-                console.log(e);
-              })) 
-        
-          
-      }
-    );
-    console.log()
-    
-}
 
 
 function* getFiles(){
@@ -232,15 +187,55 @@ try{
     yield put (setFileData({ fileId, data }))
 }catch (e){}
 }
-
-function* uploadFile({payload:{file, data, setSuccess}}){
-    try{
+const uploadFileapi= (data)=>{
+    
+    return (fire
+        .firestore()
+        .collection("files")
+        .add(data)
+        .then(async (file) => {
+          const fileData = (await file.get()).data();
+          const fileId = file.id;
+          return {fileData,fileId}
+        //   toast.success("created sucessfully");
+        //   dispatch(addFile({ data: fileData, docId: fileId }));
+        })
+        );
         
-    const fileInfo= yield call (()=>uploadFileapi(file, data, setSuccess))
-    console.log(fileInfo)
-    // yield put (addFile({ data:fileInfo.fileData, docId: fileInfo.fileId }))
-    // yield put (deleteFile())
+    }
    
+ function* uploadFile({payload:{file, data}}){
+  
+   try{  
+
+    toast.info("uploading...")
+    const uploadFileRef = fire.storage().ref(`files/${data.name}`);
+    yield call (()=>{uploadFileRef.put(file).on(
+      "state_changed",
+      (snapshot) => {
+        const prog = Math.round(
+          (snapshot.bytesTransferred / snapshot.totalBytes) * 100
+        );
+  
+        console.log("uploading " + prog + "%");
+      },
+      (error) => {
+        toast.error(error);
+      })})
+    
+      const fullData =yield call (
+      async () => { 
+        console.log("inside");
+        const fileUrl = await uploadFileRef.getDownloadURL();
+        console.log("inside 2",fileUrl);
+        const fullData = { ...data, url: fileUrl };
+        return fullData;
+    });
+    console.log(fullData);
+      const {fileData,fileId} =yield  call (uploadFileapi,fullData)
+      toast.success("Uploaded Successfully")
+      yield put (addFile({ data:fileData, docId: fileId }))
+  
     }
      
     catch (e){
